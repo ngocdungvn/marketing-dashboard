@@ -328,6 +328,7 @@ const DataService = {
             liveSheets: []
         };
 
+        await CONFIG.loadSheetsConfig();
         CONFIG.loadUrls();
 
         // Try to load each dataset from Google Sheets

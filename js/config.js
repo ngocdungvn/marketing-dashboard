@@ -131,6 +131,30 @@ const CONFIG = {
         }
     },
 
+    /**
+     * Load sheet IDs and tab names from sheets_config.json
+     */
+    async loadSheetsConfig() {
+        try {
+            const res = await fetch('sheets_config.json');
+            if (!res.ok) return;
+            const cfg = await res.json();
+            if (cfg.sheets) {
+                Object.entries(cfg.sheets).forEach(([key, val]) => {
+                    if (val && val.trim()) this.sheets[key] = val.trim();
+                });
+            }
+            if (cfg.tabNames) {
+                Object.entries(cfg.tabNames).forEach(([key, val]) => {
+                    if (Array.isArray(val) && val.length > 0) this.tabNames[key] = val;
+                });
+            }
+            console.log('✅ Loaded sheets_config.json');
+        } catch (e) {
+            console.warn('ℹ️ sheets_config.json not found, using defaults');
+        }
+    },
+
     saveUrls() {
         localStorage.setItem(this.storageKey, JSON.stringify(this.urls));
     },
