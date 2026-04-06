@@ -312,7 +312,7 @@ const DataService = {
     },
 
     /**
-     * Load all data - tries Sheet URLs first, then demo data
+     * Load all data - tries server proxy first, then direct Sheet URLs, then demo data
      */
     async loadAll() {
         const data = {
@@ -328,10 +328,52 @@ const DataService = {
             liveSheets: []
         };
 
+        // Key mapping: server key → client dataKey
+        const keyMap = {
+            'performance': 'performance',
+            'fbConversion': 'fbAds',
+            'fbMessage': 'fbMessage',
+            'googleAds': 'googleAds',
+            'tiktokAds': 'tiktokAds',
+            'kpi': 'kpis',
+            'contentPlan': 'contentPlan',
+            'tasks': 'tasks',
+        };
+
+        // Try server-side proxy first (/api/data) — returns raw CSV text
+        let proxyOk = false;
+        try {
+            const res = await fetch('/api/data');
+            if (res.ok) {
+                const proxyData = await res.json();
+                let anyData = false;
+                for (const [serverKey, clientKey] of Object.entries(keyMap)) {
+                    const csvText = proxyData[serverKey];
+                    if (csvText && csvText.trim()) {
+                        const parsed = DataService.parseCSV(csvText);
+                        if (parsed && parsed.length > 0) {
+                            data[clientKey] = parsed;
+                            data.liveSheets.push(serverKey);
+                            anyData = true;
+                            console.log(`✅ Loaded via proxy: ${serverKey} (${parsed.length} rows)`);
+                        }
+                    }
+                }
+                if (anyData) {
+                    proxyOk = true;
+                    data.isDemo = false;
+                    console.log('✅ All data loaded via server proxy');
+                    return data;
+                }
+            }
+        } catch (e) {
+            console.warn('ℹ️ Server proxy not available, trying direct fetch...');
+        }
+
+        // Fallback: direct Google Sheets fetch (client-side)
         await CONFIG.loadSheetsConfig();
         CONFIG.loadUrls();
 
-        // Try to load each dataset from Google Sheets
         const keys = [
             { key: 'performance', dataKey: 'performance', demo: 'performance' },
             { key: 'fbConversion', dataKey: 'fbAds', demo: 'fbAds' },

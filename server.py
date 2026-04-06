@@ -12,6 +12,7 @@ import ssl
 import threading
 import time
 import urllib.request
+import urllib.parse
 import csv
 import io
 import re
@@ -26,6 +27,7 @@ PORT = 8081
 BASE_DIR = Path(__file__).parent
 SCHEDULES_FILE = BASE_DIR / "schedules.json"
 CONFIG_FILE = BASE_DIR / "email_config.json"
+SHEETS_CONFIG_FILE = BASE_DIR / "sheets_config.json"
 
 
 def load_json(path, default=None):
@@ -53,6 +55,73 @@ def get_email_config():
 
 def get_schedules():
     return load_json(SCHEDULES_FILE, [])
+
+
+# ============================================
+# Server-Side Data Proxy (for LAN clients)
+# ============================================
+
+def load_sheets_config():
+    """Load sheets_config.json and return sheet IDs + tab names."""
+    cfg = load_json(SHEETS_CONFIG_FILE, {})
+    sheets = {}
+    for key, val in cfg.get("sheets", {}).items():
+        if val and val.strip():
+            m = re.search(r'/spreadsheets/d/([a-zA-Z0-9_-]+)', val)
+            sheets[key] = m.group(1) if m else val.strip()
+    tab_names = cfg.get("tabNames", {})
+    return sheets, tab_names
+
+
+def fetch_csv_raw(url, timeout=15):
+    """Fetch raw CSV text from a URL server-side."""
+    try:
+        req = urllib.request.Request(url, headers={"User-Agent": "DigiDash/1.0"})
+        with urllib.request.urlopen(req, timeout=timeout) as resp:
+            text = resp.read().decode("utf-8-sig")
+        # Check if it has at least 2 lines (header + data)
+        lines = [l for l in text.strip().split('\n') if l.strip()]
+        if len(lines) >= 2:
+            return text
+        return None
+    except Exception as e:
+        print(f"[DataProxy] Fetch error: {url[:80]}... → {e}")
+        return None
+
+
+def fetch_all_sheets_data():
+    """Fetch all sheets as raw CSV text server-side."""
+    sheets, tab_names = load_sheets_config()
+    fallback_sheets = {
+        "performance":  "1MGVtHY3E85b27TybFvjFX_eXLssbLFxeQ2h8XdJnOuM",
+        "fbConversion": "1r5pJNWK5wECSHSNokU6LyBYmu4SxXauh9wjGwVml2XM",
+        "fbMessage":    "17ZLBmaWH-TQPqv3CooheS3Pl1kT8Tdn3aPf2HUphZZA",
+        "googleAds":    "1wK96-LzkyO0AJ9TqDYbH2i1CNsBHWwfQ0QJXmXUEQm8",
+        "tiktokAds":    "1GzL3Ei6VVVQjfL7TR_rAGD_1CablE1MbQxmnhtEjmtg",
+        "kpi":          "1iPv8BnkrdpTQ-DU0XSdTljmMhRTRcHUqjPdYye679jk",
+        "contentPlan":  "1b47jW6xkUutKbl8h_U-kZFXhjVOzzBciiKcDVhFzLjQ",
+        "tasks":        "1UQE4kdUQTaxm9ZGR8G5Qw6lgQb-kEz5FfB8meSoCvcw",
+    }
+    for k, v in fallback_sheets.items():
+        if k not in sheets:
+            sheets[k] = v
+
+    default_tabs = ["Input", "data", "Data", "Sheet1"]
+    result = {}
+
+    for key, sheet_id in sheets.items():
+        tabs = tab_names.get(key, default_tabs)
+        csv_text = None
+        for tab in tabs:
+            url = f"https://docs.google.com/spreadsheets/d/{sheet_id}/gviz/tq?tqx=out:csv&sheet={urllib.parse.quote(tab)}"
+            csv_text = fetch_csv_raw(url)
+            if csv_text:
+                lines = len([l for l in csv_text.strip().split('\n') if l.strip()])
+                print(f"[DataProxy] ✅ {key}: {lines} lines (tab={tab})")
+                break
+        result[key] = csv_text or ""
+
+    return result
 
 
 # ============================================
@@ -457,7 +526,11 @@ class DigiDashHandler(SimpleHTTPRequestHandler):
         super().__init__(*args, directory=str(BASE_DIR), **kwargs)
 
     def do_GET(self):
-        if self.path == "/api/schedules":
+        if self.path == "/api/data":
+            print("[API] Fetching all sheets data (proxy)...")
+            data = fetch_all_sheets_data()
+            self.json_response(data)
+        elif self.path == "/api/schedules":
             self.json_response(get_schedules())
         elif self.path == "/api/email-config":
             config = get_email_config()
