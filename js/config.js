@@ -141,7 +141,11 @@ const CONFIG = {
             const cfg = await res.json();
             if (cfg.sheets) {
                 Object.entries(cfg.sheets).forEach(([key, val]) => {
-                    if (val && val.trim()) this.sheets[key] = val.trim();
+                    if (val && val.trim()) {
+                        // Extract Sheet ID from full URL if needed
+                        const match = val.match(/\/spreadsheets\/d\/([a-zA-Z0-9_-]+)/);
+                        this.sheets[key] = match ? match[1] : val.trim();
+                    }
                 });
             }
             if (cfg.tabNames) {

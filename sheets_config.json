@@ -2,27 +2,65 @@
   "_hướng_dẫn": "Điền Google Sheet ID hoặc link đầy đủ vào từng mục tương ứng. Hệ thống sẽ tự động lấy dữ liệu từ các sheet này.",
   "_ví_dụ_sheet_id": "1MGVtHY3E85b27TybFvjFX_eXLssbLFxeQ2h8XdJnOuM",
   "_ví_dụ_link": "https://docs.google.com/spreadsheets/d/1MGVtHY3E85b27TybFvjFX_eXLssbLFxeQ2h8XdJnOuM/edit",
-
   "sheets": {
-    "performance":  "",
-    "fbConversion": "",
-    "fbMessage":    "",
-    "googleAds":    "",
-    "tiktokAds":    "",
-    "kpi":          "",
-    "contentPlan":  "",
-    "tasks":        ""
+    "performance": "https://docs.google.com/spreadsheets/d/1MGVtHY3E85b27TybFvjFX_eXLssbLFxeQ2h8XdJnOuM/",
+    "fbConversion": "https://docs.google.com/spreadsheets/d/1r5pJNWK5wECSHSNokU6LyBYmu4SxXauh9wjGwVml2XM/",
+    "fbMessage": "https://docs.google.com/spreadsheets/d/17ZLBmaWH-TQPqv3CooheS3Pl1kT8Tdn3aPf2HUphZZA/",
+    "googleAds": "https://docs.google.com/spreadsheets/d/1wK96-LzkyO0AJ9TqDYbH2i1CNsBHWwfQ0QJXmXUEQm8/",
+    "tiktokAds": "https://docs.google.com/spreadsheets/d/1GzL3Ei6VVVQjfL7TR_rAGD_1CablE1MbQxmnhtEjmtg/",
+    "kpi": "https://docs.google.com/spreadsheets/d/1iPv8BnkrdpTQ-DU0XSdTljmMhRTRcHUqjPdYye679jk/",
+    "contentPlan": "https://docs.google.com/spreadsheets/d/1b47jW6xkUutKbl8h_U-kZFXhjVOzzBciiKcDVhFzLjQ/",
+    "tasks": "https://docs.google.com/spreadsheets/d/1XouO2H7pXf5HaM47umD_-_ZwOx4CmzZ7VnWlHq4cmD8/"
   },
-
   "_tab_names_mặc_định": "Hệ thống sẽ thử các tab: Input → data → Data → Sheet1. Nếu sheet của bạn dùng tên tab khác, điền vào đây.",
   "tabNames": {
-    "performance":  ["Input", "data", "Data", "Sheet1"],
-    "fbConversion": ["Input", "data", "Data", "Sheet1"],
-    "fbMessage":    ["Input", "data", "Data", "Sheet1"],
-    "googleAds":    ["Input", "data", "Data", "Sheet1"],
-    "tiktokAds":    ["Input", "data", "Data", "Sheet1"],
-    "kpi":          ["Input", "data", "Data", "Sheet1"],
-    "contentPlan":  ["Input", "data", "Data", "Sheet1"],
-    "tasks":        ["Input", "data", "Data", "Sheet1"]
+    "performance": [
+      "Input",
+      "data",
+      "Data",
+      "Sheet1"
+    ],
+    "fbConversion": [
+      "Input",
+      "data",
+      "Data",
+      "Sheet1"
+    ],
+    "fbMessage": [
+      "Input",
+      "data",
+      "Data",
+      "Sheet1"
+    ],
+    "googleAds": [
+      "Input",
+      "data",
+      "Data",
+      "Sheet1"
+    ],
+    "tiktokAds": [
+      "Input",
+      "data",
+      "Data",
+      "Sheet1"
+    ],
+    "kpi": [
+      "Total",
+      "data",
+      "Data",
+      "Sheet1"
+    ],
+    "contentPlan": [
+      "2. Nhập mục tiêu theo nhân viên",
+      "data",
+      "Data",
+      "Sheet1"
+    ],
+    "tasks": [
+      "Task Management",
+      "data",
+      "Data",
+      "Sheet1"
+    ]
   }
 }
