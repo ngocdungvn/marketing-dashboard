@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital Marketing Dashboard</title>
+    <meta name="description" content="Dashboard tổng hợp số liệu Digital Marketing từ Google Sheets">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <i class="fas fa-chart-line"></i>
+                <span>DigiDash</span>
+            </div>
+            <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle sidebar">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="#/tong-quan" class="nav-item active" data-page="overview">
+                <i class="fas fa-chart-line"></i>
+                <span>Hiệu suất & Ngân sách</span>
+            </a>
+            <a href="#/fb-chuyen-doi" class="nav-item" data-page="facebook">
+                <i class="fab fa-facebook"></i>
+                <span>FB Chuyển đổi</span>
+            </a>
+            <a href="#/fb-tin-nhan" class="nav-item" data-page="fbmessage">
+                <i class="fab fa-facebook-messenger"></i>
+                <span>FB Tin nhắn</span>
+            </a>
+            <a href="#/google-ads" class="nav-item" data-page="google">
+                <i class="fab fa-google"></i>
+                <span>Google Ads</span>
+            </a>
+            <a href="#/tiktok-ads" class="nav-item" data-page="tiktok">
+                <i class="fab fa-tiktok"></i>
+                <span>TikTok Ads</span>
+            </a>
+            <a href="#/kpi" class="nav-item" data-page="kpi">
+                <i class="fas fa-bullseye"></i>
+                <span>KPIs Nhân sự</span>
+            </a>
+            <a href="#/content-plan" class="nav-item" data-page="content">
+                <i class="fas fa-pen-fancy"></i>
+                <span>Content Plan</span>
+            </a>
+            <a href="#/tasks" class="nav-item" data-page="tasks">
+                <i class="fas fa-tasks"></i>
+                <span>Task Management</span>
+            </a>
+            <div style="border-top:1px solid rgba(255,255,255,0.1); margin:8px 12px;"></div>
+            <a href="#/bao-cao" class="nav-item" data-page="reports">
+                <i class="fas fa-paper-plane"></i>
+                <span>Báo cáo tự động</span>
+            </a>
+        </nav>
+        <div class="sidebar-footer">
+            <div class="data-status" id="dataStatus">
+                <i class="fas fa-circle"></i>
+                <span>Demo Data</span>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Top Bar -->
+        <header class="topbar">
+            <div class="topbar-left">
+                <button class="mobile-toggle" id="mobileToggle" aria-label="Menu">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <h1 id="pageTitle">Tổng quan Digital Marketing</h1>
+            </div>
+            <div class="topbar-right">
+                <div class="filter-group">
+                    <button class="filter-btn" id="timeFilterBtn">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span id="timeFilterLabel">Tối đa</span>
+                        <span class="filter-date-range" id="filterDateRange"></span>
+                        <i class="fas fa-chevron-down filter-arrow"></i>
+                    </button>
+                    <div class="filter-popover" id="timeFilterPopover">
+                        <div class="filter-popover-title">Chọn khoảng thời gian</div>
+                        <label class="filter-radio">
+                            <input type="radio" name="timeRange" value="this_week">
+                            <span class="radio-custom"></span>
+                            <span>Tuần này</span>
+                        </label>
+                        <label class="filter-radio">
+                            <input type="radio" name="timeRange" value="last_week">
+                            <span class="radio-custom"></span>
+                            <span>Tuần trước</span>
+                        </label>
+                        <label class="filter-radio">
+                            <input type="radio" name="timeRange" value="this_month">
+                            <span class="radio-custom"></span>
+                            <span>Tháng này</span>
+                        </label>
+                        <label class="filter-radio">
+                            <input type="radio" name="timeRange" value="last_month">
+                            <span class="radio-custom"></span>
+                            <span>Tháng trước</span>
+                        </label>
+                        <label class="filter-radio">
+                            <input type="radio" name="timeRange" value="max" checked>
+                            <span class="radio-custom"></span>
+                            <span>Tối đa</span>
+                        </label>
+                        <label class="filter-radio">
+                            <input type="radio" name="timeRange" value="custom">
+                            <span class="radio-custom"></span>
+                            <span>Tùy chỉnh</span>
+                        </label>
+                        <div class="custom-date-range" id="customDateRange">
+                            <div class="date-input-group">
+                                <label>Từ ngày</label>
+                                <input type="date" id="dateFrom">
+                            </div>
+                            <div class="date-input-group">
+                                <label>Đến ngày</label>
+                                <input type="date" id="dateTo">
+                            </div>
+                            <button class="btn btn-primary btn-sm" id="btnApplyCustomDate">Áp dụng</button>
+                        </div>
+                    </div>
+                </div>
+                <button class="btn-refresh" id="btnRefresh" title="Tải lại dữ liệu">
+                    <i class="fas fa-sync-alt"></i>
+                </button>
+                <button class="btn-settings" id="btnSettings" title="Cài đặt nguồn dữ liệu">
+                    <i class="fas fa-cog"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Overview Page -->
+        <section class="page active" id="page-overview">
+            <!-- Blue Header Banner -->
+            <div class="ov-header">
+                <img src="https://cdn-icons-png.flaticon.com/512/1055/1055646.png" alt="" style="width:36px;height:36px;filter:brightness(10)">
+                <h2>BÁO CÁO HIỆU SUẤT & NGÂN SÁCH DIGITAL MARKETING</h2>
+            </div>
+
+            <!-- Top Section: Filters LEFT + KPIs RIGHT -->
+            <div class="ov-top-section">
+                <div class="ov-filters-panel">
+                    <select id="ov-filter-company"><option value="">Mã chiến dịch</option></select>
+                    <select id="ov-filter-channel"><option value="">Kênh</option></select>
+                    <select id="ov-filter-type"><option value="">Loại chiến dịch</option></select>
+                </div>
+                <div class="ov-kpi-panel">
+                    <div class="ov-kpi-row-top">
+                        <div class="ov-kpi-card"><img src="https://cdn-icons-png.flaticon.com/512/2936/2936886.png" alt="" class="ov-kpi-img"><div><div class="ov-kpi-label2">STT</div><div class="ov-kpi-val" id="ov-stt">0</div></div></div>
+                        <div class="ov-kpi-card"><img src="https://cdn-icons-png.flaticon.com/512/2489/2489756.png" alt="" class="ov-kpi-img"><div><div class="ov-kpi-label2">Ngân sách quảng cáo dự kiến</div><div class="ov-kpi-val" id="ov-ngan-sach">0</div></div></div>
+                        <div class="ov-kpi-card"><img src="https://cdn-icons-png.flaticon.com/512/3135/3135706.png" alt="" class="ov-kpi-img"><div><div class="ov-kpi-label2">Đơn hàng trung bình dự kiến</div><div class="ov-kpi-val" id="ov-doanh-so-ky-vong">0</div></div></div>
+                    </div>
+                    <div class="ov-kpi-row-mid">
+                        <div class="ov-kpi-card"><div><div class="ov-kpi-label2">Ngân sách quảng cáo dự kiến</div><div class="ov-kpi-val" id="ov-ngan-sach-2">0</div></div></div>
+                        <div class="ov-kpi-card"><div><div class="ov-kpi-label2">CPL dự kiến Chi phí/1 lead</div><div class="ov-kpi-val" id="ov-cpl">0</div></div></div>
+                        <div class="ov-kpi-card"><div><div class="ov-kpi-label2">Số đơn hàng kỳ vọng</div><div class="ov-kpi-val" id="ov-don-hang-ky-vong">0</div></div></div>
+                    </div>
+                    <div class="ov-kpi-row-mid">
+                        <div class="ov-kpi-card"><div><div class="ov-kpi-label2">Số Leads</div><div class="ov-kpi-val" id="ov-leads">0</div></div></div>
+                        <div class="ov-kpi-card"><div><div class="ov-kpi-label2">CPS dự kiến Chi phí/1 đơn hàng</div><div class="ov-kpi-val" id="ov-cps">0</div></div></div>
+                        <div class="ov-kpi-card ov-gauge-card"><div class="ov-gauge-wrap"><canvas id="ov-gauge" width="100" height="70"></canvas><div class="ov-gauge-label">Tỷ lệ chuyển đổi dự kiến</div><div class="ov-gauge-val" id="ov-ty-le">0</div></div></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Platform Cards -->
+            <div class="ov-platform-row" id="ov-platform-cards"></div>
+
+            <!-- Charts Row 1: STT line + 2 pies -->
+            <div class="ov-charts-row">
+                <div class="chart-card" style="flex:2"><div class="chart-header"><h3><i class="fas fa-chart-line"></i> STT</h3></div><div class="chart-body"><canvas id="chart-ov-stt-line"></canvas></div></div>
+                <div class="chart-card" style="flex:1"><div class="chart-header" style="background:#e8f5e9"><h3>Doanh số theo kênh</h3></div><div class="chart-body"><canvas id="chart-ov-channel-pie"></canvas></div></div>
+                <div class="chart-card" style="flex:1"><div class="chart-header" style="background:#fff3e0"><h3>Tháng theo STT</h3></div><div class="chart-body"><canvas id="chart-ov-month-pie"></canvas></div></div>
+            </div>
+
+            <!-- Charts Row 2: Orders bar + Monthly table -->
+            <div class="ov-charts-row">
+                <div class="chart-card" style="flex:1"><div class="chart-header"><h3><i class="fas fa-chart-bar"></i> Số đơn hàng kỳ vọng</h3></div><div class="chart-body"><canvas id="chart-ov-orders-bar"></canvas></div></div>
+                <div class="table-card" style="flex:1;margin-top:0">
+                    <div class="table-header"><h3>Tổng hợp theo tháng</h3></div>
+                    <div class="table-wrapper"><table class="data-table"><thead><tr><th>Tháng</th><th>STT ▾</th><th>Số lead thực tế</th><th>Record Count</th></tr></thead><tbody id="ovMonthlyBody"></tbody></table></div>
+                </div>
+            </div>
+
+            <!-- Bottom Summary Table -->
+            <div class="table-card">
+                <div class="table-wrapper"><table class="data-table" id="ovSummaryTable"><thead><tr>
+                    <th>Loại chiến dịch</th><th>Doanh số kỳ vọng</th><th>Ngân sách quảng cáo dự kiến</th>
+                    <th>Doanh số thực tế</th><th>STT</th><th>Số lead thực tế</th>
+                    <th>Record Count</th><th>Số lead thực tế</th><th>Số đơn hàng kỳ vọng</th>
+                </tr></thead><tbody id="ovSummaryBody"></tbody></table></div>
+            </div>
+        </section>
+
+        <!-- Facebook Page -->
+        <section class="page" id="page-facebook">
+            <!-- Header Banner -->
+            <div class="fb-page-header" style="background: linear-gradient(135deg, #1877f2, #0d5bbd); border-radius: var(--radius-md); padding: 16px 28px; margin-bottom: 16px; display: flex; align-items: center; gap: 14px; color: #fff;">
+                <i class="fab fa-facebook" style="font-size: 28px"></i>
+                <h2 style="font-size: 1.15rem; font-weight: 700; margin: 0;">FACEBOOK ADS DASHBOARD (CHUYỂN ĐỔI)</h2>
+            </div>
+
+            <!-- Filters (horizontal, no date range) -->
+            <div class="fb-filter-row">
+                <select id="fb-filter-ad"><option value="">Tên quảng cáo</option></select>
+                <select id="fb-filter-adgroup"><option value="">Tên nhóm quảng cáo</option></select>
+                <select id="fb-filter-campaign"><option value="">Tên chiến dịch</option></select>
+                <select id="fb-filter-type"><option value="">Loại chiến dịch</option></select>
+                <select id="fb-filter-account"><option value="">Tên tài khoản</option></select>
+            </div>
+
+            <!-- Top KPIs -->
+            <div class="fb-kpi-row">
+                <div class="fb-kpi-card">
+                    <div class="fb-kpi-icon" style="background:#6366f1"><i class="fas fa-database"></i></div>
+                    <div class="fb-kpi-info">
+                        <span class="fb-kpi-label">Record Count</span>
+                        <span class="fb-kpi-value" id="fb-record-count">0</span>
+                    </div>
+                </div>
+                <div class="fb-kpi-card">
+                    <div class="fb-kpi-icon" style="background:#f97316"><i class="fas fa-coins"></i></div>
+                    <div class="fb-kpi-info">
+                        <span class="fb-kpi-label">Số tiền đã chi tiêu</span>
+                        <span class="fb-kpi-value" id="fb-total-spend">0</span>
+                    </div>
+                </div>
+                <div class="fb-kpi-card">
+                    <div class="fb-kpi-icon" style="background:#06b6d4"><i class="fas fa-eye"></i></div>
+                    <div class="fb-kpi-info">
+                        <span class="fb-kpi-label">Lượt hiển thị</span>
+                        <span class="fb-kpi-value" id="fb-total-impressions">0</span>
+                    </div>
+                </div>
+                <div class="fb-kpi-card">
+                    <div class="fb-kpi-icon" style="background:#22c55e"><i class="fas fa-users"></i></div>
+                    <div class="fb-kpi-info">
+                        <span class="fb-kpi-label">Người tiếp cận</span>
+                        <span class="fb-kpi-value" id="fb-total-reach">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Metric Panels -->
+            <div class="fb-metrics-row">
+                <div class="fb-metrics-panel">
+                    <div class="fb-metric"><div class="fb-metric-icon"><i class="fas fa-redo"></i></div><div><span class="fb-metric-label">Tần suất</span><span class="fb-metric-value" id="fb-frequency">0</span></div></div>
+                    <div class="fb-metric"><div class="fb-metric-icon"><i class="fas fa-link"></i></div><div><span class="fb-metric-label">Lượt click vào liên kết</span><span class="fb-metric-value" id="fb-link-clicks">0</span></div></div>
+                    <div class="fb-metric"><div class="fb-metric-icon"><i class="fas fa-dollar-sign"></i></div><div><span class="fb-metric-label">CPC (Chi phí/click liên kết)</span><span class="fb-metric-value" id="fb-cpc">0</span></div></div>
+                    <div class="fb-metric"><div class="fb-metric-icon"><i class="fas fa-share-alt"></i></div><div><span class="fb-metric-label">Số lượt chia sẻ bài viết</span><span class="fb-metric-value" id="fb-shares">0</span></div></div>
+                    <div class="fb-metric"><div class="fb-metric-icon"><i class="fas fa-heart"></i></div><div><span class="fb-metric-label">Cảm xúc với bài viết</span><span class="fb-metric-value" id="fb-reactions">0</span></div></div>
+                    <div class="fb-metric"><div class="fb-metric-icon"><i class="fas fa-comment"></i></div><div><span class="fb-metric-label">Bình luận về bài viết</span><span class="fb-metric-value" id="fb-comments">0</span></div></div>
+                </div>
+                <div class="fb-metrics-panel">
+                    <div class="fb-metric"><div class="fb-metric-icon"><i class="fas fa-mouse-pointer"></i></div><div><span class="fb-metric-label">Số lần nhấp (Tất cả)</span><span class="fb-metric-value" id="fb-clicks-all">0</span></div></div>
+                    <div class="fb-metric"><div class="fb-metric-icon"><i class="fas fa-tag"></i></div><div><span class="fb-metric-label">CPC (Tất cả)</span><span class="fb-metric-value" id="fb-cpc-all">0</span></div></div>
+                    <div class="fb-metric"><div class="fb-metric-icon"><i class="fas fa-chart-line"></i></div><div><span class="fb-metric-label">CPM (Chi phí/1000 hiển thị)</span><span class="fb-metric-value" id="fb-cpm">0</span></div></div>
+                    <div class="fb-metric"><div class="fb-metric-icon"><i class="fas fa-percentage"></i></div><div><span class="fb-metric-label">CTR (Tất cả)</span><span class="fb-metric-value" id="fb-ctr-all">0</span></div></div>
+                </div>
+            </div>
+
+            <!-- Charts Row -->
+            <div class="fb-charts-row">
+                <div class="chart-card">
+                    <div class="chart-header"><h3>Ngân sách theo chiến dịch</h3></div>
+                    <div class="chart-body"><canvas id="chart-fb-pie"></canvas></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-header"><h3>Người tiếp cận</h3></div>
+                    <div class="chart-body"><canvas id="chart-fb-reach"></canvas></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-header"><h3>Lượt hiển thị</h3></div>
+                    <div class="chart-body"><canvas id="chart-fb-impressions-bar"></canvas></div>
+                </div>
+            </div>
+
+            <!-- Full Width Chart -->
+            <div class="chart-card chart-full">
+                <div class="chart-header"><h3>Lượt hiển thị theo thời gian</h3></div>
+                <div class="chart-body"><canvas id="chart-fb-trend"></canvas></div>
+            </div>
+
+            <!-- Bottom Row: Conversion chart + Table -->
+            <div class="ov-charts-row">
+                <div class="chart-card" style="flex:0.6">
+                    <div class="chart-header"><h3>Lượt mua vs Hoàn tất đăng ký</h3></div>
+                    <div class="chart-body"><canvas id="chart-fb-conversions"></canvas></div>
+                </div>
+                <div class="table-card" style="flex:1.4;margin-top:0">
+                    <div class="table-header"><h3>Chi tiết Facebook Ads</h3></div>
+                    <div class="table-wrapper">
+                        <table class="data-table" id="fbTable">
+                            <thead>
+                                <tr>
+                                    <th>Tên nhóm QC</th><th>Tên chiến dịch</th><th>Loại chiến dịch</th>
+                                    <th>Số tiền đã chi tiêu</th><th>Lượt hiển thị</th><th>Người tiếp cận</th>
+                                </tr>
+                            </thead>
+                            <tbody id="fbTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- FB Ads Tin nhắn Page -->
+        <section class="page" id="page-fbmessage">
+            <!-- Header Banner -->
+            <div class="fb-mess-header" style="background: linear-gradient(135deg, #a855f7, #6b21a8); border-radius: var(--radius-md); padding: 16px 28px; margin-bottom: 16px; display: flex; align-items: center; gap: 14px; color: #fff;">
+                <i class="fab fa-facebook-messenger" style="font-size: 28px"></i>
+                <h2 style="font-size: 1.15rem; font-weight: 700; margin: 0; text-transform: uppercase;">FACEBOOK ADS DASHBOARD (MESS)</h2>
+            </div>
+            
+            <div class="fb-kpi-row">
+                <div class="fb-kpi-card">
+                    <div class="fb-kpi-icon" style="background:#6366f1"><i class="fas fa-database"></i></div>
+                    <div class="fb-kpi-info">
+                        <span class="fb-kpi-label">Record Count</span>
+                        <span class="fb-kpi-value" id="fbm-record-count">0</span>
+                    </div>
+                </div>
+                <div class="fb-kpi-card">
+                    <div class="fb-kpi-icon" style="background:#0ea5e9"><i class="fas fa-search-dollar"></i></div>
+                    <div class="fb-kpi-info">
+                        <span class="fb-kpi-label">Số tiền đã chi tiêu</span>
+                        <span class="fb-kpi-value" id="fbm-total-spend">0</span>
+                    </div>
+                </div>
+                <div class="fb-kpi-card">
+                    <div class="fb-kpi-icon" style="background:#eab308"><i class="fas fa-filter"></i></div>
+                    <div class="fb-kpi-info">
+                        <span class="fb-kpi-label">Lượt hiển thị</span>
+                        <span class="fb-kpi-value" id="fbm-total-impressions">0</span>
+                    </div>
+                </div>
+                <div class="fb-kpi-card">
+                    <div class="fb-kpi-icon" style="background:#ec4899"><i class="fas fa-users-cog"></i></div>
+                    <div class="fb-kpi-info">
+                        <span class="fb-kpi-label">Người tiếp cận</span>
+                        <span class="fb-kpi-value" id="fbm-total-reach">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="fb-filter-row">
+                <select id="fbm-filter-ad"><option value="">Tên quảng cáo</option></select>
+                <select id="fbm-filter-adgroup"><option value="">Tên nhóm quảng cáo</option></select>
+                <select id="fbm-filter-campaign"><option value="">Tên chiến dịch</option></select>
+                <select id="fbm-filter-type"><option value="">Loại chiến dịch</option></select>
+                <select id="fbm-filter-account"><option value="">Tên tài khoản</option></select>
+            </div>
+
+            <div class="fb-metrics-row">
+                <div class="fb-metrics-panel panel-green">
+                    <div class="fb-metric"><div class="fb-metric-icon"><i class="fas fa-address-card"></i></div><div><span class="fb-metric-label">Tần suất</span><span class="fb-metric-value" id="fbm-frequency">0</span></div></div>
+                    <div class="fb-metric"><div class="fb-metric-icon"><i class="fas fa-users"></i></div><div><span class="fb-metric-label">Lượt click vào liên kết</span><span class="fb-metric-value" id="fbm-link-clicks">0</span></div></div>
+                    <div class="fb-metric"><div class="fb-metric-icon"><i class="fas fa-chart-bar"></i></div><div><span class="fb-metric-label">CPC</span><span class="fb-metric-value" id="fbm-cpc">0</span></div></div>
+                    <div class="fb-metric"><div class="fb-metric-icon"><i class="fas fa-comment-dots"></i></div><div><span class="fb-metric-label">Số lượt chia sẻ bài viết</span><span class="fb-metric-value" id="fbm-shares">0</span></div></div>
+                    <div class="fb-metric"><div class="fb-metric-icon"><i class="fas fa-thumbs-up"></i></div><div><span class="fb-metric-label">Cảm xúc với bài viết</span><span class="fb-metric-value" id="fbm-reactions">0</span></div></div>
+                    <div class="fb-metric"><div class="fb-metric-icon"><i class="fas fa-share"></i></div><div><span class="fb-metric-label">Bình luận về bài viết</span><span class="fb-metric-value" id="fbm-comments">0</span></div></div>
+                </div>
+                <div class="fb-metrics-panel panel-grey">
+                    <div class="fb-metric"><div class="fb-metric-icon"><i class="fas fa-hand-pointer"></i></div><div><span class="fb-metric-label">Số lần nhấp (Tất cả)</span><span class="fb-metric-value" id="fbm-clicks-all">0</span></div></div>
+                    <div class="fb-metric"><div class="fb-metric-icon"><i class="fas fa-eye"></i></div><div><span class="fb-metric-label">CPC (Tất cả)</span><span class="fb-metric-value" id="fbm-cpc-all">0</span></div></div>
+                    <div class="fb-metric"><div class="fb-metric-icon"><i class="fas fa-money-bill"></i></div><div><span class="fb-metric-label">CPM</span><span class="fb-metric-value" id="fbm-cpm">0</span></div></div>
+                    <div class="fb-metric"><div class="fb-metric-icon"><i class="fas fa-percentage"></i></div><div><span class="fb-metric-label">CTR(Tất cả)</span><span class="fb-metric-value" id="fbm-ctr-all">0</span></div></div>
+                </div>
+            </div>
+
+            <div class="fb-charts-row">
+                <div class="chart-card">
+                    <div class="chart-header"><h3>Ngân sách theo chiến dịch</h3></div>
+                    <div class="chart-body"><canvas id="chart-fbm-pie"></canvas></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-header"><h3>Người tiếp cận</h3></div>
+                    <div class="chart-body"><canvas id="chart-fbm-reach"></canvas></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-header"><h3>Lượt hiển thị</h3></div>
+                    <div class="chart-body"><canvas id="chart-fbm-impressions-bar"></canvas></div>
+                </div>
+            </div>
+
+            <div class="chart-card chart-full">
+                <div class="chart-header"><h3>Lượt hiển thị theo thời gian</h3></div>
+                <div class="chart-body"><canvas id="chart-fbm-trend"></canvas></div>
+            </div>
+
+            <div class="fb-bottom-row">
+                <div class="chart-card chart-narrow">
+                    <div class="chart-header"><h3>Lượt hiển thị</h3></div>
+                    <div class="chart-body"><canvas id="chart-fbm-impressions-campaign"></canvas></div>
+                </div>
+                <div class="table-card table-wide">
+                    <div class="table-header"><h3>Chi tiết FB Ads Tin nhắn</h3></div>
+                    <div class="table-wrapper">
+                        <table class="data-table" id="fbmTable">
+                            <thead>
+                                <tr>
+                                    <th>Tên nhóm QC</th><th>Tên chiến dịch</th><th>Loại chiến dịch</th>
+                                    <th>Số tiền đã chi tiêu</th><th>Lượt hiển thị</th><th>Người tiếp cận</th>
+                                </tr>
+                            </thead>
+                            <tbody id="fbmTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- Google Ads Page -->
+        <section class="page" id="page-google">
+            <div class="kpi-grid">
+                <div class="kpi-card kpi-spending">
+                    <div class="kpi-icon"><i class="fab fa-google"></i></div>
+                    <div class="kpi-info">
+                        <span class="kpi-label">Chi tiêu Google Ads</span>
+                        <span class="kpi-value" id="kpi-gg-spending">0₫</span>
+                    </div>
+                </div>
+                <div class="kpi-card kpi-revenue">
+                    <div class="kpi-icon"><i class="fas fa-mouse-pointer"></i></div>
+                    <div class="kpi-info">
+                        <span class="kpi-label">Lượt Click</span>
+                        <span class="kpi-value" id="kpi-gg-clicks">0</span>
+                    </div>
+                </div>
+                <div class="kpi-card kpi-orders">
+                    <div class="kpi-icon"><i class="fas fa-eye"></i></div>
+                    <div class="kpi-info">
+                        <span class="kpi-label">Impressions</span>
+                        <span class="kpi-value" id="kpi-gg-impressions">0</span>
+                    </div>
+                </div>
+                <div class="kpi-card kpi-roas">
+                    <div class="kpi-icon"><i class="fas fa-percentage"></i></div>
+                    <div class="kpi-info">
+                        <span class="kpi-label">CTR</span>
+                        <span class="kpi-value" id="kpi-gg-ctr">0%</span>
+                    </div>
+                </div>
+            </div>
+            <div class="charts-grid">
+                <div class="chart-card chart-full">
+                    <div class="chart-header"><h3>Google Ads - Hiệu suất theo tháng</h3></div>
+                    <div class="chart-body"><canvas id="chart-gg-trend"></canvas></div>
+                </div>
+            </div>
+            <div class="table-card">
+                <div class="table-header"><h3>Chi tiết Google Ads</h3></div>
+                <div class="table-wrapper">
+                    <table class="data-table" id="ggTable">
+                        <thead>
+                            <tr>
+                                <th>Ngày</th><th>Chiến dịch</th><th>Chi tiêu</th>
+                                <th>Click</th><th>Hiển thị</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ggTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- TikTok Ads Page -->
+        <section class="page" id="page-tiktok">
+            <div class="kpi-grid">
+                <div class="kpi-card kpi-spending">
+                    <div class="kpi-icon"><i class="fab fa-tiktok"></i></div>
+                    <div class="kpi-info">
+                        <span class="kpi-label">Chi tiêu TikTok</span>
+                        <span class="kpi-value" id="kpi-tt-spending">0₫</span>
+                    </div>
+                </div>
+                <div class="kpi-card kpi-revenue">
+                    <div class="kpi-icon"><i class="fas fa-mouse-pointer"></i></div>
+                    <div class="kpi-info">
+                        <span class="kpi-label">Lượt Click</span>
+                        <span class="kpi-value" id="kpi-tt-clicks">0</span>
+                    </div>
+                </div>
+                <div class="kpi-card kpi-orders">
+                    <div class="kpi-icon"><i class="fas fa-shopping-bag"></i></div>
+                    <div class="kpi-info">
+                        <span class="kpi-label">Đơn hàng</span>
+                        <span class="kpi-value" id="kpi-tt-orders">0</span>
+                    </div>
+                </div>
+                <div class="kpi-card kpi-roas">
+                    <div class="kpi-icon"><i class="fas fa-money-bill-wave"></i></div>
+                    <div class="kpi-info">
+                        <span class="kpi-label">Doanh số</span>
+                        <span class="kpi-value" id="kpi-tt-revenue">0₫</span>
+                    </div>
+                </div>
+            </div>
+            <div class="charts-grid">
+                <div class="chart-card chart-full">
+                    <div class="chart-header"><h3>TikTok Ads - Hiệu suất theo tháng</h3></div>
+                    <div class="chart-body"><canvas id="chart-tt-trend"></canvas></div>
+                </div>
+            </div>
+            <div class="table-card">
+                <div class="table-header"><h3>Chi tiết TikTok Ads</h3></div>
+                <div class="table-wrapper">
+                    <table class="data-table" id="ttTable">
+                        <thead>
+                            <tr>
+                                <th>Ngày</th><th>Chiến dịch</th><th>Chi tiêu</th>
+                                <th>Click</th><th>Hiển thị</th><th>Đơn hàng</th><th>Doanh số</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ttTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- KPI Page -->
+        <section class="page" id="page-kpi">
+            <div class="charts-grid">
+                <div class="chart-card chart-full">
+                    <div class="chart-header"><h3>KPIs Nhân sự - Tiến độ hoàn thành</h3></div>
+                    <div class="chart-body"><canvas id="chart-kpi-progress"></canvas></div>
+                </div>
+            </div>
+            <div class="table-card">
+                <div class="table-header"><h3>Bảng KPI chi tiết</h3></div>
+                <div class="table-wrapper">
+                    <table class="data-table" id="kpiTable">
+                        <thead>
+                            <tr>
+                                <th>Bộ phận</th><th>KPI</th><th>Mục tiêu</th>
+                                <th>Trọng số</th><th>Kết quả</th><th>Tiến độ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="kpiTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+        <!-- Content Plan Page -->
+        <section class="page" id="page-content">
+            <div class="fb-kpi-row">
+                <div class="fb-kpi-card">
+                    <div class="fb-kpi-icon" style="background:#6366f1"><i class="fas fa-file-alt"></i></div>
+                    <div class="fb-kpi-info">
+                        <span class="fb-kpi-label">Tổng nội dung</span>
+                        <span class="fb-kpi-value" id="cp-total">0</span>
+                    </div>
+                </div>
+                <div class="fb-kpi-card">
+                    <div class="fb-kpi-icon" style="background:#22c55e"><i class="fas fa-check-circle"></i></div>
+                    <div class="fb-kpi-info">
+                        <span class="fb-kpi-label">Đã duyệt</span>
+                        <span class="fb-kpi-value" id="cp-approved">0</span>
+                    </div>
+                </div>
+                <div class="fb-kpi-card">
+                    <div class="fb-kpi-icon" style="background:#06b6d4"><i class="fas fa-paper-plane"></i></div>
+                    <div class="fb-kpi-info">
+                        <span class="fb-kpi-label">Đã đăng</span>
+                        <span class="fb-kpi-value" id="cp-posted">0</span>
+                    </div>
+                </div>
+                <div class="fb-kpi-card">
+                    <div class="fb-kpi-icon" style="background:#f97316"><i class="fas fa-chart-pie"></i></div>
+                    <div class="fb-kpi-info">
+                        <span class="fb-kpi-label">Tỷ lệ hoàn thành</span>
+                        <span class="fb-kpi-value" id="cp-completion">0%</span>
+                    </div>
+                </div>
+            </div>
+            <div class="fb-filter-row">
+                <select id="cp-filter-channel"><option value="">Kênh</option></select>
+                <select id="cp-filter-type"><option value="">Loại content</option></select>
+                <select id="cp-filter-person"><option value="">Nhân viên</option></select>
+                <select id="cp-filter-status"><option value="">Tình trạng</option></select>
+            </div>
+            <div class="fb-charts-row">
+                <div class="chart-card">
+                    <div class="chart-header"><h3>Phân bổ theo loại content</h3></div>
+                    <div class="chart-body"><canvas id="chart-cp-type"></canvas></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-header"><h3>Nội dung theo kênh</h3></div>
+                    <div class="chart-body"><canvas id="chart-cp-channel"></canvas></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-header"><h3>Tình trạng</h3></div>
+                    <div class="chart-body"><canvas id="chart-cp-status"></canvas></div>
+                </div>
+            </div>
+            <div class="table-card">
+                <div class="table-header"><h3>Chi tiết Content Plan</h3></div>
+                <div class="table-wrapper">
+                    <table class="data-table" id="cpTable">
+                        <thead>
+                            <tr>
+                                <th>STT</th><th>Nhân viên</th><th>Tháng</th><th>Chiến dịch</th>
+                                <th>Loại content</th><th>Kênh</th><th>Phê duyệt</th><th>Tình trạng</th>
+                            </tr>
+                        </thead>
+                        <tbody id="cpTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tasks Page -->
+        <section class="page" id="page-tasks">
+            <!-- Task Filters -->
+            <div class="task-filters" id="taskFilters">
+                <select id="taskFilterStatus" class="task-filter-select">
+                    <option value="all">Trạng thái</option>
+                </select>
+                <select id="taskFilterPerson" class="task-filter-select">
+                    <option value="all">Người thực hiện</option>
+                </select>
+            </div>
+
+            <!-- KPI Cards Row -->
+            <div class="tk-kpi-grid">
+                <div class="tk-kpi-card">
+                    <div class="tk-kpi-icon" style="background: rgba(99, 102, 241, 0.12); color: #6366f1;">
+                        <i class="fas fa-clipboard-list"></i>
+                    </div>
+                    <div class="tk-kpi-info">
+                        <span class="tk-kpi-label">Tổng nhiệm vụ</span>
+                        <span class="tk-kpi-value" id="task-total">0</span>
+                    </div>
+                </div>
+                <div class="tk-kpi-card">
+                    <div class="tk-kpi-icon" style="background: rgba(34, 197, 94, 0.12); color: #22c55e;">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="tk-kpi-info">
+                        <span class="tk-kpi-label">Đã hoàn thành</span>
+                        <span class="tk-kpi-value" id="task-done">0</span>
+                    </div>
+                </div>
+                <div class="tk-kpi-card">
+                    <div class="tk-kpi-icon" style="background: rgba(59, 130, 246, 0.12); color: #3b82f6;">
+                        <i class="fas fa-spinner"></i>
+                    </div>
+                    <div class="tk-kpi-info">
+                        <span class="tk-kpi-label">Đang thực hiện</span>
+                        <span class="tk-kpi-value" id="task-progress">0</span>
+                    </div>
+                </div>
+                <div class="tk-kpi-card tk-kpi-divider"></div>
+                <div class="tk-kpi-card">
+                    <div class="tk-kpi-icon" style="background: rgba(16, 185, 129, 0.12); color: #10b981;">
+                        <i class="fas fa-calendar-check"></i>
+                    </div>
+                    <div class="tk-kpi-info">
+                        <span class="tk-kpi-label">Đúng hạn</span>
+                        <span class="tk-kpi-value" id="task-ontime">0</span>
+                    </div>
+                </div>
+                <div class="tk-kpi-card">
+                    <div class="tk-kpi-icon" style="background: rgba(239, 68, 68, 0.12); color: #ef4444;">
+                        <i class="fas fa-exclamation-circle"></i>
+                    </div>
+                    <div class="tk-kpi-info">
+                        <span class="tk-kpi-label">Quá hạn</span>
+                        <span class="tk-kpi-value" id="task-overdue">0</span>
+                    </div>
+                </div>
+                <div class="tk-kpi-card">
+                    <div class="tk-kpi-icon" style="background: rgba(34, 197, 94, 0.12); color: #22c55e;">
+                        <i class="fas fa-award"></i>
+                    </div>
+                    <div class="tk-kpi-info">
+                        <span class="tk-kpi-label">Đạt chất lượng</span>
+                        <span class="tk-kpi-value" id="task-quality-pass">0</span>
+                    </div>
+                </div>
+                <div class="tk-kpi-card">
+                    <div class="tk-kpi-icon" style="background: rgba(249, 115, 22, 0.12); color: #f97316;">
+                        <i class="fas fa-times-circle"></i>
+                    </div>
+                    <div class="tk-kpi-info">
+                        <span class="tk-kpi-label">Không đạt CL</span>
+                        <span class="tk-kpi-value" id="task-quality-fail">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gauges Row -->
+            <div class="tk-gauge-grid">
+                <div class="tk-gauge-card">
+                    <div class="tk-gauge-title">Tỷ lệ hoàn thành nhiệm vụ</div>
+                    <canvas id="gauge-completion" width="280" height="170"></canvas>
+                    <div class="tk-gauge-label">Tiến độ</div>
+                    <div class="tk-gauge-percent" id="gauge-completion-val">0%</div>
+                </div>
+                <div class="tk-gauge-card">
+                    <div class="tk-gauge-title">Tỷ lệ hoàn thành đúng hạn</div>
+                    <canvas id="gauge-ontime" width="280" height="170"></canvas>
+                    <div class="tk-gauge-label">Đúng hạn</div>
+                    <div class="tk-gauge-percent" id="gauge-ontime-val">0%</div>
+                </div>
+                <div class="tk-gauge-card">
+                    <div class="tk-gauge-title">Tỷ lệ đạt chất lượng</div>
+                    <canvas id="gauge-quality" width="280" height="170"></canvas>
+                    <div class="tk-gauge-label">Chất lượng</div>
+                    <div class="tk-gauge-percent" id="gauge-quality-val">0%</div>
+                </div>
+            </div>
+
+            <!-- Charts Row: 2 bar charts -->
+            <div class="charts-grid">
+                <div class="chart-card">
+                    <div class="chart-header"><h3>Tỷ lệ đạt nhiệm vụ chất lượng</h3></div>
+                    <div class="chart-body"><canvas id="chart-task-quality"></canvas></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-header"><h3>Tỷ lệ hoàn thành nhiệm vụ đúng hạn</h3></div>
+                    <div class="chart-body"><canvas id="chart-task-ontime"></canvas></div>
+                </div>
+            </div>
+
+            <!-- Task Table -->
+            <div class="table-card">
+                <div class="table-header"><h3>Danh sách công việc</h3></div>
+                <div class="table-wrapper">
+                    <table class="data-table" id="taskTable">
+                        <thead>
+                            <tr>
+                                <th>STT</th><th>Deadline</th><th>Nhiệm vụ được giao</th>
+                                <th>Người thực hiện</th><th>Trạng thái</th><th>Tiến độ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="taskTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========== REPORTS PAGE ========== -->
+        <section class="page" id="page-reports">
+            <!-- Email Config -->
+            <div class="rpt-section">
+                <div class="rpt-section-header">
+                    <i class="fas fa-envelope"></i>
+                    <h3>Cấu hình Email SMTP</h3>
+                    <button class="btn-toggle-config" id="btnToggleEmailConfig"><i class="fas fa-chevron-down"></i></button>
+                </div>
+                <div class="rpt-email-config" id="emailConfigPanel" style="display:none;">
+                    <div class="rpt-form-grid">
+                        <div class="rpt-form-group">
+                            <label>SMTP Server</label>
+                            <input type="text" id="rptSmtpHost" placeholder="smtp.gmail.com" />
+                        </div>
+                        <div class="rpt-form-group">
+                            <label>Port</label>
+                            <input type="number" id="rptSmtpPort" placeholder="587" />
+                        </div>
+                        <div class="rpt-form-group">
+                            <label>Email gửi</label>
+                            <input type="email" id="rptSmtpUser" placeholder="your@gmail.com" />
+                        </div>
+                        <div class="rpt-form-group">
+                            <label>App Password</label>
+                            <input type="password" id="rptSmtpPass" placeholder="xxxx xxxx xxxx xxxx" />
+                        </div>
+                        <div class="rpt-form-group">
+                            <label>Tên hiển thị</label>
+                            <input type="text" id="rptSmtpName" placeholder="DigiDash Report" />
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" id="btnSaveEmailConfig"><i class="fas fa-save"></i> Lưu cấu hình</button>
+                    <button class="btn btn-secondary" id="btnTestEmail"><i class="fas fa-paper-plane"></i> Gửi test</button>
+                </div>
+            </div>
+
+            <!-- Send Now -->
+            <div class="rpt-section">
+                <div class="rpt-section-header">
+                    <i class="fas fa-bolt"></i>
+                    <h3>Gửi báo cáo ngay</h3>
+                </div>
+                <div class="rpt-send-now">
+                    <div class="rpt-form-grid">
+                        <div class="rpt-form-group">
+                            <label>Chọn Dashboard</label>
+                            <select id="rptSendPage">
+                                <option value="overview">Tổng quan</option>
+                                <option value="facebook">FB Chuyển đổi</option>
+                                <option value="fbmessage">FB Tin nhắn</option>
+                                <option value="google">Google Ads</option>
+                                <option value="tiktok">TikTok Ads</option>
+                                <option value="kpi">KPIs Nhân sự</option>
+                                <option value="content">Content Plan</option>
+                                <option value="tasks">Task Management</option>
+                            </select>
+                        </div>
+                        <div class="rpt-form-group">
+                            <label>Email nhận (cách nhau bằng dấu phẩy)</label>
+                            <input type="text" id="rptSendEmails" placeholder="person1@company.com, person2@company.com" />
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" id="btnSendNow"><i class="fas fa-paper-plane"></i> Gửi ngay</button>
+                    <span class="rpt-send-status" id="rptSendStatus"></span>
+                </div>
+            </div>
+
+            <!-- Scheduled Reports -->
+            <div class="rpt-section">
+                <div class="rpt-section-header">
+                    <i class="fas fa-clock"></i>
+                    <h3>Lịch gửi tự động</h3>
+                    <button class="btn btn-primary btn-sm" id="btnAddSchedule"><i class="fas fa-plus"></i> Thêm lịch</button>
+                </div>
+
+                <!-- Add Schedule Form (hidden) -->
+                <div class="rpt-schedule-form" id="scheduleFormPanel" style="display:none;">
+                    <h4 style="margin:0 0 16px 0;font-size:16px;color:#334155;">Thêm lịch gửi mới</h4>
+                    <div class="rpt-form-grid">
+                        <div class="rpt-form-group">
+                            <label>Dashboard</label>
+                            <select id="schedPage">
+                                <option value="overview">Tổng quan</option>
+                                <option value="facebook">FB Chuyển đổi</option>
+                                <option value="fbmessage">FB Tin nhắn</option>
+                                <option value="google">Google Ads</option>
+                                <option value="tiktok">TikTok Ads</option>
+                                <option value="kpi">KPIs Nhân sự</option>
+                                <option value="content">Content Plan</option>
+                                <option value="tasks">Task Management</option>
+                            </select>
+                        </div>
+                        <div class="rpt-form-group">
+                            <label>Tần suất</label>
+                            <select id="schedFreq">
+                                <option value="weekly">Hàng tuần</option>
+                                <option value="monthly">Hàng tháng</option>
+                            </select>
+                        </div>
+                        <div class="rpt-form-group">
+                            <label>Ngày gửi</label>
+                            <select id="schedDay">
+                                <option value="1">Thứ 2</option>
+                                <option value="2">Thứ 3</option>
+                                <option value="3">Thứ 4</option>
+                                <option value="4">Thứ 5</option>
+                                <option value="5">Thứ 6</option>
+                                <option value="6">Thứ 7</option>
+                                <option value="0">Chủ nhật</option>
+                            </select>
+                        </div>
+                        <div class="rpt-form-group">
+                            <label>Giờ gửi</label>
+                            <input type="time" id="schedTime" value="08:00" />
+                        </div>
+                        <div class="rpt-form-group rpt-form-full">
+                            <label>Email nhận</label>
+                            <input type="text" id="schedEmails" placeholder="person1@company.com, person2@company.com" />
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" id="btnSaveSchedule"><i class="fas fa-save"></i> Lưu lịch</button>
+                    <button class="btn btn-secondary" id="btnCancelSchedule">Hủy</button>
+                </div>
+
+                <!-- Schedule Table -->
+                <table class="rpt-table" id="scheduleTable">
+                    <thead>
+                        <tr>
+                            <th>Dashboard</th>
+                            <th>Tần suất</th>
+                            <th>Ngày/Giờ</th>
+                            <th>Email nhận</th>
+                            <th>Trạng thái</th>
+                            <th>Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody id="scheduleTableBody">
+                        <tr><td colspan="6" class="rpt-empty">Chưa có lịch gửi. Nhấn "Thêm lịch" để tạo.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <!-- Settings Modal -->
+    <div class="modal-overlay" id="settingsModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>Cài đặt nguồn dữ liệu</h2>
+                <button class="modal-close" id="modalClose">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-desc">Dán link Google Sheet vào đây (link edit, share hoặc CSV đều được). <a href="https://support.google.com/docs/answer/183965" target="_blank">Hướng dẫn</a></p>
+                <div class="form-group">
+                    <label>1. Báo cáo Hiệu suất & Ngân sách (tab data)</label>
+                    <input type="url" id="url-performance" placeholder="https://docs.google.com/spreadsheets/d/SHEET_ID/edit">
+                </div>
+                <div class="form-group">
+                    <label>2. FB Ads Chuyển đổi (tab data)</label>
+                    <input type="url" id="url-fb-conversion" placeholder="https://docs.google.com/spreadsheets/d/SHEET_ID/edit">
+                </div>
+                <div class="form-group">
+                    <label>3. FB Ads Tin nhắn (tab data)</label>
+                    <input type="url" id="url-fb-message" placeholder="https://docs.google.com/spreadsheets/d/SHEET_ID/edit">
+                </div>
+                <div class="form-group">
+                    <label>4. Google Ads (tab data)</label>
+                    <input type="url" id="url-google-ads" placeholder="https://docs.google.com/spreadsheets/d/SHEET_ID/edit">
+                </div>
+                <div class="form-group">
+                    <label>5. TikTok Ads (tab data)</label>
+                    <input type="url" id="url-tiktok-ads" placeholder="https://docs.google.com/spreadsheets/d/SHEET_ID/edit">
+                </div>
+                <div class="form-group">
+                    <label>6. KPIs Nhân sự (tab data)</label>
+                    <input type="url" id="url-kpi" placeholder="https://docs.google.com/spreadsheets/d/SHEET_ID/edit">
+                </div>
+                <div class="form-group">
+                    <label>7. Content Plan (tab data)</label>
+                    <input type="url" id="url-content-plan" placeholder="https://docs.google.com/spreadsheets/d/SHEET_ID/edit">
+                </div>
+                <div class="form-group">
+                    <label>8. Task Management (tab data)</label>
+                    <input type="url" id="url-tasks" placeholder="https://docs.google.com/spreadsheets/d/SHEET_ID/edit">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="btnClearUrls">Xóa tất cả</button>
+                <button class="btn btn-primary" id="btnSaveUrls">Lưu & Tải dữ liệu</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner">
+            <div class="spinner"></div>
+            <p>Đang tải dữ liệu...</p>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script src="js/config.js"></script>
+    <script src="js/data.js"></script>
+    <script src="js/charts.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
