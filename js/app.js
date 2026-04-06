@@ -1061,6 +1061,15 @@ const App = {
             statusEl.addEventListener('change', () => this.renderTasks());
             personEl.addEventListener('change', () => this.renderTasks());
             this._taskFiltersSetup = true;
+
+            // Default: filter by "Tạ Ngọc Dũng"
+            const defaultPerson = 'Tạ Ngọc Dũng';
+            for (const opt of personEl.options) {
+                if (opt.value === defaultPerson) {
+                    personEl.value = defaultPerson;
+                    break;
+                }
+            }
         }
     },
 

@@ -8,6 +8,12 @@ set -e
 
 echo "=== Cloudflare Tunnel Setup ==="
 
+# 0. Ensure curl is installed
+if ! command -v curl &> /dev/null; then
+    echo "Installing curl..."
+    apt update && apt install -y curl wget
+fi
+
 # 1. Install cloudflared
 if ! command -v cloudflared &> /dev/null; then
     echo "Installing cloudflared..."
