@@ -1252,6 +1252,25 @@ const App = {
                 this.renderCurrentPage();
             }
         });
+
+        // Show date range for default selection on load
+        this.updateFilterDateRange();
+    },
+
+    /**
+     * Update the filter button label to include date range
+     */
+    updateFilterDateRange() {
+        const range = this.getTimeRange();
+        const el = document.getElementById('filterDateRange');
+        if (!el) return;
+
+        if (range) {
+            const fmt = (d) => `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}`;
+            el.textContent = `(${fmt(range.start)} - ${fmt(range.end)})`;
+        } else {
+            el.textContent = '';
+        }
     },
 
     /**
