@@ -84,14 +84,14 @@
                 <div class="filter-group">
                     <button class="filter-btn" id="timeFilterBtn">
                         <i class="fas fa-calendar-alt"></i>
-                        <span id="timeFilterLabel">Tối đa</span>
+                        <span id="timeFilterLabel">Tuần này</span>
                         <span class="filter-date-range" id="filterDateRange"></span>
                         <i class="fas fa-chevron-down filter-arrow"></i>
                     </button>
                     <div class="filter-popover" id="timeFilterPopover">
                         <div class="filter-popover-title">Chọn khoảng thời gian</div>
                         <label class="filter-radio">
-                            <input type="radio" name="timeRange" value="this_week">
+                            <input type="radio" name="timeRange" value="this_week" checked>
                             <span class="radio-custom"></span>
                             <span>Tuần này</span>
                         </label>
@@ -111,7 +111,7 @@
                             <span>Tháng trước</span>
                         </label>
                         <label class="filter-radio">
-                            <input type="radio" name="timeRange" value="max" checked>
+                            <input type="radio" name="timeRange" value="max">
                             <span class="radio-custom"></span>
                             <span>Tối đa</span>
                         </label>
