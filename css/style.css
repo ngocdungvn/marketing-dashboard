@@ -1658,6 +1658,18 @@ body::before {
     height: 36px;
     flex-shrink: 0;
 }
+.ov-kpi-icon {
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    font-size: 20px;
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
 .ov-kpi-label2 {
     font-size: 0.78rem;
     color: var(--text-secondary);
