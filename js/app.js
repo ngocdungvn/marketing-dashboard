@@ -179,10 +179,22 @@ const App = {
         const timeFiltered = this.filterByMonth(allPerf);
         const filtered = this.applyOvFilters(timeFiltered);
 
-        // Populate filters (no Năm/Tháng — handled by top-right time picker)
-        this.populateFbFilter('ov-filter-company', allPerf, 'maChienDich', 'Mã chiến dịch');
-        this.populateFbFilter('ov-filter-channel', allPerf, 'kenh', 'Kênh');
-        this.populateFbFilter('ov-filter-type', allPerf, 'loaiChienDich', 'Loại chiến dịch');
+        // Cascading filters: each dropdown shows only values valid with other selections
+        const ovFilters = [
+            { id: 'ov-filter-company', field: 'maChienDich', label: 'Mã chiến dịch' },
+            { id: 'ov-filter-channel', field: 'kenh', label: 'Kênh' },
+            { id: 'ov-filter-type', field: 'loaiChienDich', label: 'Loại chiến dịch' },
+        ];
+        ovFilters.forEach(current => {
+            // Filter data by all OTHER filters (not the current one)
+            let contextData = timeFiltered;
+            ovFilters.forEach(other => {
+                if (other.id === current.id) return;
+                const el = document.getElementById(other.id);
+                if (el && el.value) contextData = contextData.filter(r => r[other.field] === el.value);
+            });
+            this.populateFilter(current.id, contextData, current.field, current.label);
+        });
 
         // KPIs
         const sumN = (arr, f) => arr.reduce((s, r) => s + DataService.parseNumber(r[f]), 0);
@@ -541,8 +553,20 @@ const App = {
     },
 
     /**
-     * Populate a FB filter dropdown
+     * Populate a filter dropdown (always refreshes options for cascading)
      */
+    populateFilter(selectId, data, field, defaultText) {
+        const select = document.getElementById(selectId);
+        if (!select) return;
+        const currentVal = select.value;
+        const values = [...new Set(data.map(r => r[field]).filter(Boolean))].sort();
+        select.innerHTML = `<option value="">${defaultText}</option>` + values.map(v => `<option value="${this.escapeHtml(v)}">${this.escapeHtml(v)}</option>`).join('');
+        // Restore previous selection if still valid
+        if (currentVal && values.includes(currentVal)) {
+            select.value = currentVal;
+        }
+    },
+
     populateFbFilter(selectId, data, field, defaultText) {
         const select = document.getElementById(selectId);
         if (!select) return;
