@@ -80,7 +80,7 @@ const DataService = {
             const values = rows[i];
             const row = {};
             headers.forEach((header, idx) => {
-                const key = this.normalizeHeader(header);
+                const key = this.normalizeHeader(header) || `_col${idx}`;
                 row[key] = values[idx] || '';
             });
             data.push(row);
@@ -158,6 +158,28 @@ const DataService = {
             'kpi 2': 'kpiName2',
             'giá trị kpi 2': 'kpiValue2',
             'trạng thái': 'trangThai',
+
+            // Content Plan specific
+            'đơn vị': 'donVi',
+            'target': 'target',
+            'thực đạt': 'thucDat',
+            'tỷ lệ hoàn thành': 'tyLeHoanThanh',
+            'ngày hoàn thành': 'ngayHoanThanh',
+            'thời gian bắt đầu': 'thoiGianBatDau',
+            'thời gian kết thúc': 'thoiGianKetThuc',
+
+            // KPI Nhân sự specific
+            'bộ phận/phòng/ban': 'boPhan',
+            'viễn cảnh': 'vienCanh',
+            'mục tiêu chiến lược': 'mucTieuChienLuoc',
+            'mã kpi': 'maKpi',
+            'chiều hướng': 'chieuHuong',
+            'nguồn lấy dữ liệu': 'nguonDuLieu',
+            'người làm báo cáo': 'nguoiBaoCao',
+            'đơn vị tính': 'donViTinh',
+            'cách tính % hoàn thành kpi': 'cachTinh',
+            'xác thực': 'xacThuc',
+            'mã nhân viên': 'maNhanVien',
 
             // Common date & account columns
             'ngày': 'ngay',

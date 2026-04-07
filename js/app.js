@@ -747,20 +747,29 @@ const App = {
         const filtered = this.applyContentFilters(allData);
 
         const total = filtered.length;
-        const approved = filtered.filter(r => (r.pheDuyet || '').toLowerCase().includes('duyệt')).length;
-        const posted = filtered.filter(r => (r.tinhTrang || '').toLowerCase().includes('post')).length;
-        const completion = total > 0 ? ((posted / total) * 100).toFixed(0) : 0;
+        const totalTarget = filtered.reduce((s, r) => s + DataService.parseNumber(r.target), 0);
+        const totalThucDat = filtered.reduce((s, r) => s + DataService.parseNumber(r.thucDat), 0);
+        const completion = totalTarget > 0 ? ((totalThucDat / totalTarget) * 100).toFixed(0) : 0;
 
         document.getElementById('cp-total').textContent = total;
-        document.getElementById('cp-approved').textContent = approved;
-        document.getElementById('cp-posted').textContent = posted;
+        document.getElementById('cp-approved').textContent = this.formatCompact(totalTarget);
+        document.getElementById('cp-posted').textContent = this.formatCompact(totalThucDat);
         document.getElementById('cp-completion').textContent = completion + '%';
+
+        // Update KPI card labels
+        const labels = document.querySelectorAll('#page-content .fb-kpi-label');
+        if (labels.length >= 4) {
+            labels[0].textContent = 'Record Count';
+            labels[1].textContent = 'Target';
+            labels[2].textContent = 'Thực đạt';
+            labels[3].textContent = 'Tỷ lệ hoàn thành';
+        }
 
         // Filters
         this.populateFbFilter('cp-filter-channel', allData, 'kenh', 'Kênh');
         this.populateFbFilter('cp-filter-type', allData, 'loaiContent', 'Loại content');
         this.populateFbFilter('cp-filter-person', allData, 'tenNhanVien', 'Nhân viên');
-        this.populateFbFilter('cp-filter-status', allData, 'tinhTrang', 'Tình trạng');
+        this.populateFbFilter('cp-filter-status', allData, 'trangThai', 'Trạng thái');
 
         // Charts
         const types = [...new Set(filtered.map(r => r.loaiContent).filter(Boolean))];
@@ -771,27 +780,34 @@ const App = {
         const channelCounts = channels.map(c => filtered.filter(r => r.kenh === c).length);
         this.createSimpleBarChart('chart-cp-channel', channels, channelCounts, 'Nội dung', '#6366f1');
 
-        const statuses = [...new Set(filtered.map(r => r.tinhTrang).filter(Boolean))];
-        const statusCounts = statuses.map(s => filtered.filter(r => r.tinhTrang === s).length);
+        const statuses = [...new Set(filtered.map(r => r.trangThai).filter(Boolean))];
+        const statusCounts = statuses.map(s => filtered.filter(r => r.trangThai === s).length);
         ChartManager.createBudgetDoughnut('chart-cp-status', statuses.length > 0 ? statuses : ['N/A'], statusCounts.length > 0 ? statusCounts : [1]);
 
         // Table
-        document.getElementById('cpTableBody').innerHTML = filtered.map(row => `<tr>
+        document.getElementById('cpTableBody').innerHTML = filtered.map(row => {
+            const pct = DataService.parseNumber(row.tyLeHoanThanh);
+            const statusClass = (row.trangThai || '').includes('Đúng hạn') ? 'positive' : 
+                                (row.trangThai || '').includes('Quá hạn') ? 'negative' : '';
+            return `<tr>
             <td>${this.escapeHtml(row.stt || '')}</td>
             <td>${this.escapeHtml(row.tenNhanVien || '')}</td>
-            <td>${this.escapeHtml(row.thang || '')}</td>
             <td>${this.escapeHtml(row.tenChienDich || '')}</td>
             <td>${this.escapeHtml(row.loaiContent || '')}</td>
             <td>${this.escapeHtml(row.kenh || '')}</td>
-            <td>${this.escapeHtml(row.pheDuyet || '')}</td>
-            <td>${this.escapeHtml(row.tinhTrang || '')}</td>
-        </tr>`).join('');
+            <td>${this.escapeHtml(row.donVi || '')}</td>
+            <td>${this.escapeHtml(row.target || '')}</td>
+            <td>${this.escapeHtml(row.thucDat || '')}</td>
+            <td><span class="kpi-change ${statusClass}">${row.tyLeHoanThanh || '0%'}</span></td>
+            <td><span class="kpi-change ${statusClass}">${this.escapeHtml(row.trangThai || '')}</span></td>
+        </tr>`;
+        }).join('');
     },
 
     applyContentFilters(data) {
         let result = data;
         [{ id: 'cp-filter-channel', field: 'kenh' }, { id: 'cp-filter-type', field: 'loaiContent' },
-         { id: 'cp-filter-person', field: 'tenNhanVien' }, { id: 'cp-filter-status', field: 'tinhTrang' }].forEach(f => {
+         { id: 'cp-filter-person', field: 'tenNhanVien' }, { id: 'cp-filter-status', field: 'trangThai' }].forEach(f => {
             const el = document.getElementById(f.id);
             if (el && el.value) result = result.filter(r => r[f.field] === el.value);
         });
@@ -878,24 +894,31 @@ const App = {
         const allKpis = this.data.kpis || [];
         const kpis = this.filterByMonth(allKpis);
 
-        const kpiLabels = kpis.map(r => r.kpi || '');
-        const kpiValues = kpis.map(r => DataService.parseNumber(r.ketQua));
+        // Group by tên nhân viên and calculate average % hoàn thành
+        const people = [...new Set(kpis.map(r => r.tenNhanVien).filter(Boolean))];
+        const kpiLabels = people;
+        const kpiValues = people.map(p => {
+            const rows = kpis.filter(r => r.tenNhanVien === p);
+            const vals = rows.map(r => DataService.parseNumber(r._col21));
+            return vals.length > 0 ? vals.reduce((s, v) => s + v, 0) / vals.length : 0;
+        });
 
         ChartManager.createKPIChart('chart-kpi-progress', kpiLabels, kpiValues);
 
         const tbody = document.getElementById('kpiTableBody');
         tbody.innerHTML = kpis.map(row => {
-            const val = DataService.parseNumber(row.ketQua);
-            const colorClass = val >= 100 ? 'positive' : val >= 80 ? '' : 'negative';
+            const pct = DataService.parseNumber(row._col21);
+            const colorClass = pct >= 100 ? 'positive' : pct >= 80 ? '' : 'negative';
             return `<tr>
+                <td>${this.escapeHtml(row.tenNhanVien || '')}</td>
                 <td>${this.escapeHtml(row.boPhan || '')}</td>
-                <td>${this.escapeHtml(row.kpi || '')}</td>
-                <td>${this.escapeHtml(row.mucTieu || '')}</td>
-                <td>${this.escapeHtml(row.trongSo || '')}</td>
-                <td><span class="kpi-change ${colorClass}">${val}%</span></td>
+                <td title="${this.escapeHtml(row.kpi || '')}">${this.escapeHtml(row.kpi || '')}</td>
+                <td>${this.escapeHtml(row._col10 || '')}</td>
+                <td>${this.escapeHtml(row._col19 || '')}</td>
+                <td>${this.escapeHtml(row._col20 || '')}</td>
+                <td><span class="kpi-change ${colorClass}">${row._col21 || '0%'}</span></td>
                 <td>
-                    <div class="progress-bar"><div class="progress-bar-fill" style="width: ${Math.min(val, 100)}%"></div></div>
-                    ${val}%
+                    <div class="progress-bar"><div class="progress-bar-fill" style="width: ${Math.min(pct, 100)}%"></div></div>
                 </td>
             </tr>`;
         }).join('');
