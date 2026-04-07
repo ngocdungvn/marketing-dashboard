@@ -830,6 +830,20 @@ body::before {
     border-bottom: none;
 }
 
+/* Task table specific column widths */
+#taskTable th:nth-child(1),
+#taskTable td:nth-child(1) { width: 50px; text-align: center; }
+#taskTable th:nth-child(2),
+#taskTable td:nth-child(2) { width: 100px; }
+#taskTable th:nth-child(3),
+#taskTable td:nth-child(3) { min-width: 200px; white-space: normal; }
+#taskTable th:nth-child(4),
+#taskTable td:nth-child(4) { min-width: 140px; padding-right: 24px; }
+#taskTable th:nth-child(5),
+#taskTable td:nth-child(5) { min-width: 120px; padding-right: 24px; }
+#taskTable th:nth-child(6),
+#taskTable td:nth-child(6) { min-width: 120px; }
+
 /* Status badges */
 .status-badge {
     display: inline-flex;
